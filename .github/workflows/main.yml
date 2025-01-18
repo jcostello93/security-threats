@@ -4,16 +4,23 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      # Checkout code
+      - uses: actions/checkout@v3
+
+      # Run Snyk to check for vulnerabilities
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/node@master
-        continue-on-error: true # To make sure that SARIF upload gets called
+        continue-on-error: false # short-circuit if vuln is found
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --sarif-file-output=snyk.sarif --all-projects
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
+          args: --all-projects
+
+      # Archive code into a ZIP file (only runs if no vulnerabilities are found)
+      - name: Archive code
+        uses: actions/archive@v3
         with:
-          sarif_file: snyk.sarif
+          path: .
+          format: zip
+          output: code.zip
