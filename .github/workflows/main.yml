@@ -1,7 +1,7 @@
 name: Scan code with Snyk
 on: push
 jobs:
-  security:
+  snyk-scan:
     runs-on: ubuntu-latest
     steps:
       # Checkout code
@@ -17,9 +17,14 @@ jobs:
           command: test
           args: --all-projects --fail-on=all
 
-      # Archive code into a ZIP file (only runs if no vulnerabilities are found)
+  archive:
+    runs-on: ubuntu-latest
+    needs: snyk-scan
+    steps:
+      - uses: actions/checkout@v3
+
       - name: Create zip
         uses: ihiroky/archive-action@v1
         with:
-          root_dir: . # Root directory to archive
+          root_dir: .
           file_path: code.zip # Path for the resulting ZIP file
